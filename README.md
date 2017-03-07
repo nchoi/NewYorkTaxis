@@ -1,8 +1,17 @@
-## Welcome to GitHub Pages
+## New York Taxis
 
 You can use the [editor on GitHub](https://github.com/nchoi/NewYorkTaxis/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 
+This is the Data Science Final Project of
+- Leandro “Lloyd” Bengzon (lbengzon)
+- Luke Murray (lmurray)
+- Nicolas Choi (nchoi)
+- Zachary Kirschenbaum (zkirsche)
+
+
+
 Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### 
 
 ### Markdown
 

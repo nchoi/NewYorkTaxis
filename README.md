@@ -7,6 +7,6 @@ This is the Data Science Final Project of
 - Zachary Kirschenbaum (zkirsche)
 
 ### Blog 1
-[Blog Post 1](https://nchoi.github.io/NewYorkTaxis/blogpost1)
+[Blog Post 1](https://nchoi.github.io/NewYorkTaxis/blogpost1.html)
 
 

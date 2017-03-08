@@ -8,6 +8,9 @@ Thus, we now have a database of tables from both datasets small enough but also 
 
 ### Preliminary Findings
 Having done this p
+
+![Image of Yaktocat](https://octodex.github.com/images/yaktocat.png)
+
 ### Challenges
 
 ### The Future

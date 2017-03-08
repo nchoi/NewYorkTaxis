@@ -8,8 +8,17 @@ Thus, we now have a database of tables from both datasets small enough but also 
 
 ### Preliminary Findings
 Having done this p
+![Image of SQL Query](/imgs/screenshot1.png)
+![Average payment](/imgs/average_payment.png)
+![Payments per hour](/imgs/payments_per_hour.png)
+![Rides per hour](/imgs/rides_per_hour.png)
+![Percent tip per hour](/imgs/pct_tip_per_hour.png)
+![Percent tip per hour](/imgs/percent_tip_720.png)
+![Tips percent of fare1](/imgs/tip_percentage_related_to_fare.png)
+![Tips percent of fare2](/imgs/tips_percent_of_fare.png)
 
-![Image of Yaktocat](/imgs/screenshot1.png)
+
+
 
 ### Challenges
 

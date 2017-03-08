@@ -8,14 +8,16 @@ Thus, we now have a database of tables from both datasets small enough but also 
 
 ### Preliminary Findings
 Having done this p
-![Image of SQL Query](/imgs/screenshot1.png)
-![Average payment](/imgs/average_payment.png)
-![Payments per hour](/imgs/payments_per_hour.png)
-![Rides per hour](/imgs/rides_per_hour.png)
-![Percent tip per hour](/imgs/pct_tip_per_hour.png)
-![Percent tip per hour](/imgs/percent_tip_720.png)
-![Tips percent of fare1](/imgs/tip_percentage_related_to_fare.png)
-![Tips percent of fare2](/imgs/tips_percent_of_fare.png)
+
+
+![Image of SQL Query](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/screenshot1.png?raw=true)
+![Average payment](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/average_payment.png?raw=true)
+![Payments per hour](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/payments_per_hour.png?raw=true)
+![Rides per hour](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/rides_per_hour.png?raw=true)
+![Percent tip per hour](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/pct_tip_per_hour.png?raw=true)
+![Percent tip per hour](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/percent_tip_720.png?raw=true)
+![Tips percent of fare1](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/tip_percentage_related_to_fare.png?raw=true)
+![Tips percent of fare2](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/tips_percent_of_fare.png?raw=true)
 
 
 

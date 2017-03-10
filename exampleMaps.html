@@ -1,0 +1,85 @@
+<html>
+  <head>
+<!--        leaflet stylesheet-->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />      
+<!--        leaflet source-->
+        <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+<!--        d3 source-->
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+<!--        custom stylesheet-->
+        <link rel="stylesheet" href=styles.css />
+        <script src="Leaflet.D3SvgOverlay/L.D3SvgOverlay.js"></script>
+  </head>
+  <body>
+<!--    div to hold the map, must have the id map for reference in stylesheet and scripts-->
+    <div id="map"></div>
+
+
+    <script>
+    
+    // get the height and width of the map
+    var mapWidth = document.getElementById('map').offsetWidth;
+    var mapHeight = document.getElementById('map').offsetHeight;
+
+    // path to the json we will be displaying
+        
+    var geoJsonFilePath = "https://github.com/nchoi/NewYorkTaxis/blob/master/geoData/neighborhoods.json?raw=true";
+    
+    // possible styles to use with cartodb basemaps
+    //light_all, dark_all, light_nolabels, light_only_labels, dark_nolabels, dark_only_labels
+    var style = "dark_nolabels";
+        
+    // create bounds for the map, these were hand calculated to allow for nyc
+    var southWest = L.latLng(40.474865, -74.367142)
+    var northEast = L.latLng(40.974422, -73.539047)
+    var bounds = L.latLngBounds(southWest, northEast);
+        
+    // initialize the map on the "map" div with a given center and zoom
+    var map = L.map('map', {
+        center: [40.70, -73.94],
+        zoom: 10,
+        zoomControl: true,
+        zoomAnimation: true      
+    }).setMaxBounds(bounds);
+        
+    // get the background of the maps from cartodb, use the style from earlier
+    L.tileLayer(`https://cartodb-basemaps-{s}.global.ssl.fastly.net/${style}/{z}/{x}/{y}.png`, 
+    {
+        // max zoom level
+        maxZoom: 15,
+        minZoom: 9,
+        // attribution in the lower right (necessary for copyright reasons!)
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'
+    }).addTo(map);
+    
+    // variable to store the feature collection
+    var featureCollection = null;
+        
+    // create the geoJson overlay
+    var geoJsonOverlay = L.d3SvgOverlay(function(sel, proj){
+            sel.selectAll("path")
+            // iterate through all the features in the collection (geoJSON is a featureCollection)
+            .data(featureCollection.features) 
+            // for each feature append a path
+            .enter().append("path")
+                .attr("d", proj.pathFromGeojson);
+    }, {zoomHide:true});
+        
+    // load the geoJSON data using d3.json. the function is asychronous so a lot of code is gonna go inside. This basically means that unless the code is inside the function it could be called from anywhere
+    d3.json(geoJsonFilePath, function(error, collection) {
+        if (error) throw error;
+        
+        featureCollection = collection;
+        
+        geoJsonOverlay.addTo(map);
+
+        
+    });
+    
+        
+
+        
+
+    </script>
+  </body>
+</html>

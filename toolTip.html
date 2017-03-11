@@ -8,49 +8,14 @@
         <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
 <!--        custom stylesheet-->
         <link rel="stylesheet" href="https://rawgit.com/nchoi/NewYorkTaxis/master/map_styles.css" />
-      
-        <style>
-            /*Tooltip styling*/
-#tooltip {
-        position: absolute;
-        width: 200px;
-        height: auto;
-        padding: 10px;
-        background-color: white;
-        -webkit-border-radius: 10px;
-        -moz-border-radius: 10px;
-        border-radius: 10px;
-        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        pointer-events: none;
-        z-index: 1000;
-}
-
-#tooltip.hidden {
-        display: none;
-}
-
-#tooltip p {
-        margin: 0;
-        font-family: sans-serif;
-        font-size: 16px;
-        line-height: 20px;
-}
-        </style>
   </head>
   <body>
-      
-      
-
 
 <!--    div to hold the map, must have the id map for reference in stylesheet and scripts-->
     <div id="map"></div>
       
 <!--    tooltip for displaying info on the map-->
     <div id="tooltip" class="hidden leaflet-zoom-hide">
-        <p><strong>Neighborhood</strong></p>
-        <p><span id="value">100</span></p>
     </div>
       
 
@@ -66,7 +31,7 @@
     var shiftY = 0;
 
     // path to the json we will be displaying
-    var geoJsonFilePath = "https://rawgit.com/nchoi/NewYorkTaxis/master/geoData/neighborhoods.json";
+    var geoJsonFilePath = "https://rawgit.com/nchoi/NewYorkTaxis/master/geoData/boroughs.json";
     
     // possible styles to use with cartodb basemaps
     //light_all, dark_all, light_nolabels, light_only_labels, dark_nolabels, dark_only_labels
@@ -128,7 +93,8 @@
         // add the interactive handlers to each of the svgs
         feature.attr("class", "leaflet-interactive")
                 .on("mouseover", mouseover)
-                .on("mouseout", mouseout);
+                .on("mouseout", mouseout)
+                .on("mousemove", mousemove);
                         
         
         // whenever the map is zoomed, reset the svg
@@ -140,22 +106,22 @@
         // Reposition the SVG to cover the correct features
         function reset() {
         
-        // we need to calculate how large our svg element should be we use d3 to get a projected bounding box of our geoJSON data (here projected bounding box just means we are getting a bounding box in pixel coordinates. it has been projected from lat long)
-        var bounds = path.bounds(collection), 
-                        topLeft = bounds[0], 
-                        bottomRight = bounds[1];
-        
-        // set the width and height of the svg based on the pixel coordinates of the boundinx box returned
-        svg.attr("width", bottomRight[0] - topLeft[0])
-            .attr("height", bottomRight[1] - topLeft[1])
-            .style("left", topLeft[0] + "px")
-            .style("top", topLeft[1] + "px");
+            // we need to calculate how large our svg element should be we use d3 to get a projected bounding box of our geoJSON data (here projected bounding box just means we are getting a bounding box in pixel coordinates. it has been projected from lat long)
+            var bounds = path.bounds(collection), 
+                            topLeft = bounds[0], 
+                            bottomRight = bounds[1];
 
-        // shift all the elements in the svg so that the topLeft or (origin) of the points is in the proper location on the map
-        g.attr("transform", `translate(${-topLeft[0]},${-topLeft[1]})`);
-        
-        // we can calculate the 'd' attribute, which gives the path a list of coordinates to fill or trace by passing it our path function from earlier which transforms geoJSON data into pixel coordinates, because feature is a list of selections, this line will provide path data for every feature in our data
-        feature.attr("d", path);
+            // set the width and height of the svg based on the pixel coordinates of the boundinx box returned
+            svg.attr("width", bottomRight[0] - topLeft[0])
+                .attr("height", bottomRight[1] - topLeft[1])
+                .style("left", topLeft[0] + "px")
+                .style("top", topLeft[1] + "px");
+
+            // shift all the elements in the svg so that the topLeft or (origin) of the points is in the proper location on the map
+            g.attr("transform", `translate(${-topLeft[0]},${-topLeft[1]})`);
+
+            // we can calculate the 'd' attribute, which gives the path a list of coordinates to fill or trace by passing it our path function from earlier which transforms geoJSON data into pixel coordinates, because feature is a list of selections, this line will provide path data for every feature in our data
+            feature.attr("d", path);
         }
         
         // called whenever we mouse over the svg element
@@ -163,17 +129,27 @@
             // change the highlight to grey
             d3.select(this).attr("fill", "rgb(100, 100, 100)"); 
             
-            // calculate x and y values relative to the map
-            var mousePosition = d3.mouse(d3.select("#map").node());
-            var xPosition = mousePosition[0];
-            var yPosition = mousePosition[1];
+            var tooltip = d3.select("#tooltip");
+            
+            // add any new p elements based on the data
+            tooltip.selectAll("p")
+                    .data(d3.keys(d.properties))
+                    .enter()
+                    .append("p");
+            
+            // select all the p elements including the new ones
+            var p = tooltip.selectAll("p");
+            
+            // remove any p elements that are no longer bound to data
+            p.exit().remove();
+                      
+            // for each p element append the correct data
+            p.text(function(d2) {
+                return `${d2}, ${d.properties[d2]}`;
+            })
 
-            //Update the tooltip position and value
-            d3.select("#tooltip")
-              .style("left", xPosition + "px")
-              .style("top", yPosition + "px")
-              .select("#value")
-              .text(d.properties.NTAName);
+            // reposition the tooltip
+            repositionTooltip();
 
             //Show the tooltip
             d3.select("#tooltip").classed("hidden", false);
@@ -181,9 +157,31 @@
         }
         
         function mouseout(d) {
+            // change the fill back to black
             d3.select(this).attr("fill", "rgb(0, 0, 0)"); 
             //Hide the tooltip
             d3.select("#tooltip").classed("hidden", true);
+        }
+        
+        function mousemove(d) {
+            repositionTooltip();
+        }
+        
+        function repositionTooltip() {
+            // calculate x and y values relative to the map
+            var mousePosition = d3.mouse(d3.select("#map").node());
+            var xPosition = mousePosition[0];
+            var yPosition = mousePosition[1];
+
+            // get a reference to the tooltip
+            var tooltip = d3.select("#tooltip");
+            
+            // get the height of the tooltip
+            var tooltipHeight = tooltip.node().getBoundingClientRect().height;
+            
+            // set the tooltip's new left and top
+            tooltip.style("left", xPosition + "px")
+                    .style("top", yPosition - tooltipHeight + "px");
         }
 
     // code here

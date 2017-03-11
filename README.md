@@ -12,7 +12,8 @@ We aim to use transportation and weather data sets to optimize the routes that t
 
 ### Example Maps
 [First Example Map](https://nchoi.github.io/NewYorkTaxis/exampleMaps.html)  
-[Interactive Highlight Map](https://nchoi.github.io/NewYorkTaxis/interactiveHighlightMap.html)
+[Interactive Highlight Map](https://nchoi.github.io/NewYorkTaxis/interactiveHighlightMap.html)  
+[Tooltip Example](https://nchoi.github.io/NewYorkTaxis/tooltip.html)
 
 ### Blog 1
 [Blog Post 1](https://nchoi.github.io/NewYorkTaxis/blogpost1.html)

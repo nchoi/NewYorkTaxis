@@ -30,3 +30,9 @@
         font-size: 16px;
         line-height: 20px;
 }
+
+/*clustering styling*/
+.leaflet-div-icon {
+    background-color: rgba(255,255,255,0);
+  border-width: 0;
+}

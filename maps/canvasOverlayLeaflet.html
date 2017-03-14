@@ -6,8 +6,6 @@
         <script type="text/javascript" src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
 <!--        d3 source-->
         <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
-<!--        custom stylesheet-->
-        <link rel="stylesheet" href="../map_styles.css" />
 <!--        canvas overlay-->
         <script type="text/javascript" src="../L.CanvasLayer.js"></script>
   </head>
@@ -21,8 +19,8 @@
         height = Math.max(500, window.innerHeight);
         
     d3.select("#map")
-        .attr("width", width)
-        .attr("height", height);
+        .style("width", width)
+        .style("height", height);
 
     // path to the data we will be displaying        
     var csvFilePath = "../geoData/cluster_points.csv";

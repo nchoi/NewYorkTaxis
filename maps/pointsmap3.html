@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+    body {
+      margin: 0;
+    }
+    #map {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -10;
+    }
+    #canvasLayer {
+        z-index: 0;
+    }
+
+</style>
+<div class="container">
+<svg id="map"></svg>
+</div>
+
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script src="//d3js.org/d3-tile.v0.0.min.js"></script>
+<script src="../geoData/cluster_points.js"></script>
+<script>
+
+    // based off http://bl.ocks.org/mbostock/5914438    
+    var pi = Math.PI,
+        tau = 2 * pi;
+
+    // height and width of the map are 960, by 500 or the window size
+    var width = Math.max(960, window.innerWidth),
+        height = Math.max(500, window.innerHeight);
+    
+    // projection is used to map from spherical coordinates to a plane
+    var projection = d3.geoMercator()
+                            .scale(1 / tau)
+                            .translate([0, 0]);
+
+    // tile is a library used to determine where map tiles should go
+    var tile = d3.tile()
+        .size([width, height]);
+
+    // zoom used to provide zoom behaviors
+    var zoom = d3.zoom()
+        .scaleExtent([1 << 19, 1 << 23])
+        .on("zoom", zoomed);
+
+    // set the height and width of the svg
+    var svg = d3.select("#map")
+        .attr("width", width)
+        .attr("height", height)
+        .on("mousemove", mousemoved);
+    
+    // add a raster group to the svg which will display map tiles
+    var raster = svg.append("g");
+    
+    // give a heiht and width to the canvas
+    var canvas = d3.select('.container')
+                    .append('canvas')
+                      .attr('id', 'canvasLayer')
+                      .attr('width', width)
+                      .attr('height', height),
+        // get the canvas drawing context
+        context = canvas.node().getContext('2d');
+    
+    // path which draws onto the canvas using the projection from earlier
+    var path = d3.geoPath()
+            .projection(projection)
+            .context(context)
+            .pointRadius([.2]);
+    
+    var points;
+    var center;
+    
+    d3.json("../geoData/cluster_points.json", function(error, data) {
+        if (error) throw error;
+
+        // Compute the projected initial center.
+        center = projection([-73.96034821113064, 40.74178804249603]);
+
+        points = data;
+        
+        // Apply a zoom transform equivalent to projection.{scale,translate,center}.
+        initialZoom(canvas);
+        initialZoom(svg);
+        
+        drawPoints(points);
+    });
+
+
+    function zoomed() {
+        // get the transform
+        var transform = d3.event.transform;
+
+        // apply the transform to the tiles in the background
+        var tiles = tile
+            .scale(transform.k)
+            .translate([transform.x, transform.y])
+            ();
+        
+        // apply the transform to the projection
+        projection.scale(transform.k / tau)
+                       .translate([transform.x, transform.y]);
+
+        // translate the background based on the tiles scale and translate
+        var image = raster
+                        .attr("transform", stringify(tiles.scale, tiles.translate))
+                        .selectAll("image")
+                        .data(tiles, function(d) { return d; });
+
+        // remove extra images
+        image.exit().remove();
+
+        // add nrew images
+        image.enter().append("image")
+                        .attr("xlink:href", function(d) { 
+                                    return `http://cartodb-basemaps-${"abc"[d[1] % 3]}.global.ssl.fastly.net/light_all/${d[2]}/${d[0]}/${d[1]}.png`; 
+                                })
+                        .attr("x", function(d) { return d[0] * 256; })
+                        .attr("y", function(d) { return d[1] * 256; })
+                        .attr("width", 256)
+                        .attr("height", 256);
+        
+          // clear the current rectangle of any points
+          context.clearRect(0, 0, width, height);
+          
+          // draw all the points again
+          drawPoints(points);
+    }
+
+    // transforms a scale into something we can request
+    function stringify(scale, translate) {
+        var k = scale / 256, 
+            r = scale % 1 ? Number : Math.round;
+        return `translate(${r(translate[0] * scale)}, ${r(translate[1] * scale)})scale(${k})`;
+    }
+    
+    // tells the longitude and latitude whenver the mouse moves
+    function mousemoved() {
+        var transform = d3.zoomTransform(this);
+        var point = projection.invert(d3.mouse(this));
+    }
+    
+    // puts the svg and canvas in the correct place
+    function initialZoom(element) {
+        element.call(zoom)
+               .call(zoom.transform, d3.zoomIdentity
+                  .translate(width / 2, height / 2)
+                  .scale(1 << 19)
+                  .translate(-center[0], -center[1]));
+
+    }
+    
+    // draw all the points
+    function drawPoints(points) {
+        context.beginPath();
+        path(points);
+        context.stroke();
+    }
+
+    function drawPoint(point) {
+      path(point);
+      context.fillStyle = '#3388a7'
+      context.fill()
+    }
+
+</script>

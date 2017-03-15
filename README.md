@@ -15,7 +15,8 @@ We aim to use transportation and weather data sets to optimize the routes that t
 [Interactive Tooltip](https://nchoi.github.io/NewYorkTaxis/maps/toolTip.html)  
 [Clustering Points](https://nchoi.github.io/NewYorkTaxis/maps/clusters.html)  
 [Heat map](https://nchoi.github.io/NewYorkTaxis/maps/heatmap.html)  
-[Quadtree based stream rendering of 200k points](https://nchoi.github.io/NewYorkTaxis/maps/canvasQuadtreeStreamRender.html)
+[Quadtree based stream rendering of 200k points](https://nchoi.github.io/NewYorkTaxis/maps/canvasQuadtreeStreamRender.html)  
+[Points with ability to render by hour]((https://nchoi.github.io/NewYorkTaxis/maps/hourlyPoints.html))
 
 ### Blog 1
 [Blog Post 1](https://nchoi.github.io/NewYorkTaxis/blogpost1.html)

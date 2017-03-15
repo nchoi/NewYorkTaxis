@@ -1,0 +1,268 @@
+<html>
+  <head>
+<!--        leaflet stylesheet-->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />      
+<!--        leaflet source-->
+        <script type="text/javascript" src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+<!--        d3 source-->
+        <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+<!--        custom stylesheet-->
+        <link rel="stylesheet" href="https://rawgit.com/nchoi/NewYorkTaxis/master/map_styles.css" />
+<!--        leaflet marker clustering js-->
+        <script type="text/javascript" src="https://unpkg.com/leaflet.markercluster@1.0.3/dist/leaflet.markercluster.js"></script>
+<!--        leaflet marker clustering style-->
+        <link rel="stylesheet" src="https://unpkg.com/leaflet.markercluster@1.0.3/dist/MarkerCluster.css"/>
+<!--        the clusters-->
+        <script type="text/javascript" src="https://rawgit.com/nchoi/NewYorkTaxis/master/geoData/cluster_points.js"></script>
+  </head>
+  <body>
+
+<!--    div to hold the map, must have the id map for reference in stylesheet and scripts-->
+    <div id="map"></div>
+      
+<!--    tooltip for displaying info on the map-->
+    <div id="tooltip" class="hidden leaflet-zoom-hide">
+    </div>
+      
+
+
+    <script>   
+    // path to the json we will be displaying
+    var geoJsonFilePath = "https://rawgit.com/nchoi/NewYorkTaxis/master/geoData/boroughs.json";
+    
+    // possible styles to use with cartodb basemaps
+    //light_all, dark_all, light_nolabels, light_only_labels, dark_nolabels, dark_only_labels
+    var style = "light_nolabels";
+        
+    // create bounds for the map, these were hand calculated to allow for nyc
+    var southWest = L.latLng(40.474865, -74.367142)
+    var northEast = L.latLng(40.974422, -73.539047)
+    var bounds = L.latLngBounds(southWest, northEast);
+        
+    // initialize the map on the "map" div with a given center and zoom
+    var map = L.map('map', {
+        center: [40.70, -73.94],
+        zoom: 10,
+        zoomControl: true,
+        zoomAnimation: true      
+    }).setMaxBounds(bounds);
+        
+    // get the background of the maps from cartodb, use the style from earlier
+    L.tileLayer(`https://cartodb-basemaps-{s}.global.ssl.fastly.net/${style}/{z}/{x}/{y}.png`, 
+    {
+        maxZoom: 15,
+        minZoom: 9,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'
+    }).addTo(map);
+        
+    // create the markers for clustering
+    var maxRadius = 30; // maximum radius for the clusters
+    var markers = L.markerClusterGroup({
+        chunkedLoading: true,
+        iconCreateFunction: createCluster
+    });    
+        
+    function createCluster(cluster) {
+        var children = cluster.getAllChildMarkers();
+        var n = children.length;
+        // determine the radius of the cluster based on the number of digits
+        var clusterRadius = maxRadius - (n < 10 ? 15 : n < 100 ? 10 : n < 1000 ? 5 : 0);
+        // determine the color of the cluster based on the number of digits
+        var clusterColor = determineClusterColor(n);
+        var data = n;
+        var html = createIconInnerHtmlWithD3function(clusterRadius, clusterColor, data);
+        return L.divIcon({html: html,
+                           iconSize: new L.Point(clusterRadius * 2, clusterRadius * 2)
+                          });
+    }
+        
+    function createIconInnerHtmlWithD3function(clusterRadius, clusterColor, data) {
+            
+            w = 2 * clusterRadius;
+            h = 2 * clusterRadius;
+            centerX = clusterRadius;
+            centerY = clusterRadius;
+            
+            //Create an svg element
+            var svg = document.createElementNS(d3.namespace("svg"), "svg");
+            //Create the pie chart
+            var icon = d3.select(svg)
+                .attr('width', w)
+                .attr('height', h);
+            
+            icon.append("circle")
+                .attr("cx", centerX)
+                .attr("cy", centerY)
+                .attr("r", clusterRadius)
+                .attr("fill", clusterColor)
+                .attr("fill-opacity", .6);
+            
+            icon.append("text")
+                .attr("x", centerX)
+                .attr("y", centerY)
+                .attr("text-anchor","middle")
+                .attr("dominant-baseline", "middle")
+                .text(data);
+            //Return the svg-markup rather than the actual element
+            return serializeXmlNode(svg);
+    }
+        
+    // convert an svg to its string xml representation
+    function serializeXmlNode(xmlNode) {
+        if (typeof window.XMLSerializer != "undefined") {
+            return (new window.XMLSerializer()).serializeToString(xmlNode);
+        } else if (typeof xmlNode.xml != "undefined") {
+            return xmlNode.xml;
+        }
+        return "";
+    }
+        
+    function determineClusterColor(n) {
+        if (n < 10)
+            return "rgb(142, 220, 65)";
+        if (n < 100)
+            return "rgb(232, 235, 75)";
+        if (n < 1000)
+            return "rgb(232, 235, 75)";
+        else
+            return "rgb(230, 58, 49)";
+    }
+        
+    for(var i = 0; i < clusters.length; i++) {
+        var lng = clusters[i][0];
+        var lat = clusters[i][1];
+        var marker = L.marker(new L.LatLng(lat, lng));
+        markers.addLayer(marker);
+    }
+    
+    map.addLayer(markers);
+    
+    // add an SVG element to Leaflet’s overlay pane. Leaflet automatically repositions the overlay pane when the map pans.
+    var svg = d3.select(map.getPanes().overlayPane).append("svg");
+    
+    // inside the svg we have a group element which is used to translate the svg elements so that the top left corner of the svg, 0,0 corresponds to leaflet's layer origin
+    var g = svg.append("g").attr("class", "leaflet-zoom-hide");
+        
+    // load the geoJSON data using d3.json. the function is asychronous so a lot of code is gonna go inside. This basically means that unless the code is inside the function it could be called from anywhere
+    d3.json(geoJsonFilePath, function(error, collection) {
+        if (error) throw error;
+        
+        // converts lat lng coordinates to pixel points on the map
+        function projectPoint(lng, lat) {
+            var point = map.latLngToLayerPoint(new L.LatLng(lat, lng));
+            this.stream.point(point.x, point.y);
+        }
+        
+        // converts points using the mapping function projectPoint
+        var transform = d3.geoTransform({point: projectPoint});
+        
+        // the path converts geoJSON data to svg using the transform
+        var path = d3.geoPath().projection(transform);
+        
+        // create path elements for each of the features in the json and 
+        var feature = g.selectAll("path")
+                        // iterate through all the features in the collection (geoJSON is a featureCollection)
+                        .data(collection.features) 
+                        // for each feature append a path
+                        .enter().append("path");
+        
+        // add the interactive handlers to each of the svgs
+        feature.attr("class", "leaflet-interactive")
+                .on("mouseover", mouseover)
+                .on("mouseout", mouseout)
+                .on("mousemove", mousemove);
+                        
+        
+        // whenever the map is zoomed, reset the svg
+        map.on("zoomend", reset); 
+        
+        // reset the svg on the first run through the code as well
+        reset();
+
+        // Reposition the SVG to cover the correct features
+        function reset() {
+        
+            // we need to calculate how large our svg element should be we use d3 to get a projected bounding box of our geoJSON data (here projected bounding box just means we are getting a bounding box in pixel coordinates. it has been projected from lat long)
+            var bounds = path.bounds(collection), 
+                            topLeft = bounds[0], 
+                            bottomRight = bounds[1];
+
+            // set the width and height of the svg based on the pixel coordinates of the boundinx box returned
+            svg.attr("width", bottomRight[0] - topLeft[0])
+                .attr("height", bottomRight[1] - topLeft[1])
+                .style("left", topLeft[0] + "px")
+                .style("top", topLeft[1] + "px");
+
+            // shift all the elements in the svg so that the topLeft or (origin) of the points is in the proper location on the map
+            g.attr("transform", `translate(${-topLeft[0]},${-topLeft[1]})`);
+
+            // we can calculate the 'd' attribute, which gives the path a list of coordinates to fill or trace by passing it our path function from earlier which transforms geoJSON data into pixel coordinates, because feature is a list of selections, this line will provide path data for every feature in our data
+            feature.attr("d", path);
+        }
+        
+        // called whenever we mouse over the svg element
+        function mouseover(d) {
+            // change the highlight to grey
+            d3.select(this).attr("fill", "rgb(100, 100, 100)"); 
+            
+            var tooltip = d3.select("#tooltip");
+            
+            // add any new p elements based on the data
+            tooltip.selectAll("p")
+                    .data(d3.keys(d.properties))
+                    .enter()
+                    .append("p");
+            
+            // select all the p elements including the new ones
+            var p = tooltip.selectAll("p");
+            
+            // remove any p elements that are no longer bound to data
+            p.exit().remove();
+                      
+            // for each p element append the correct data
+            p.text(function(d2) {
+                return `${d2}, ${d.properties[d2]}`;
+            })
+
+            // reposition the tooltip
+            repositionTooltip();
+
+            //Show the tooltip
+            d3.select("#tooltip").classed("hidden", false);
+
+        }
+        
+        function mouseout(d) {
+            // change the fill back to black
+            d3.select(this).attr("fill", "rgb(0, 0, 0)"); 
+            //Hide the tooltip
+            d3.select("#tooltip").classed("hidden", true);
+        }
+        
+        function mousemove(d) {
+            repositionTooltip();
+        }
+        
+        function repositionTooltip() {
+            // calculate x and y values relative to the map
+            var mousePosition = d3.mouse(d3.select("#map").node());
+            var xPosition = mousePosition[0];
+            var yPosition = mousePosition[1];
+
+            // get a reference to the tooltip
+            var tooltip = d3.select("#tooltip");
+            
+            // get the height of the tooltip
+            var tooltipHeight = tooltip.node().getBoundingClientRect().height;
+            
+            // set the tooltip's new left and top
+            tooltip.style("left", xPosition + "px")
+                    .style("top", yPosition - tooltipHeight + "px");
+        }
+
+    // code here
+    });
+
+    </script>
+  </body>
+</html>

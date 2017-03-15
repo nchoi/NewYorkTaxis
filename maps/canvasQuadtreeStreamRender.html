@@ -1,0 +1,189 @@
+<html>
+  <head>
+<!--        leaflet stylesheet-->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />      
+<!--        leaflet source-->
+        <script type="text/javascript" src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+<!--        d3 source-->
+        <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+<!--        canvas overlay-->
+        <script type="text/javascript" src="https://rawgit.com/nchoi/NewYorkTaxis/master/L.CanvasLayer.js"></script>
+  </head>
+  <body>
+<!--    div to hold the map, must have the id map for reference in stylesheet and scripts-->
+    <div id="map"></div>
+
+    <script>
+    // height and width of the map are 960, by 500 or the window size
+    var width = Math.max(960, window.innerWidth),
+        height = Math.max(500, window.innerHeight);
+        
+    d3.select("#map")
+        .style("width", width)
+        .style("height", height);
+
+    // path to the data we will be displaying        
+    var csvFilePath = "https://cdn.rawgit.com/nchoi/NewYorkTaxis/bbd8a815/geoData/cluster_points.csv";
+    
+    // possible styles to use with cartodb basemaps
+    //light_all, dark_all, light_nolabels, light_only_labels, dark_nolabels, dark_only_labels
+    var style = "light_all";
+        
+    // create bounds for the map, these were hand calculated to allow for nyc
+    var southWest = L.latLng(40.474865, -74.367142)
+    var northEast = L.latLng(40.974422, -73.539047)
+    var bounds = L.latLngBounds(southWest, northEast);
+        
+    // initialize the map on the "map" div with a given center and zoom
+    var map = L.map('map', {
+        center: [40.70, -73.94],
+        zoom: 10,
+        zoomControl: true,
+        zoomAnimation: true      
+    }).setMaxBounds(bounds);
+        
+    // get the background of the maps from cartodb, use the style from earlier
+    L.tileLayer(`https://cartodb-basemaps-{s}.global.ssl.fastly.net/${style}/{z}/{x}/{y}.png`, 
+    {
+        // max zoom level
+        maxZoom: 15,
+        minZoom: 10,
+        // attribution in the lower right (necessary for copyright reasons!)
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'
+    }).addTo(map);
+
+    // create a quadtree to hold our data
+    var tree = d3.quadtree()
+                .x(getLng)
+                .y(getLat)
+                .extent([[-74.367142, 40.474865], [-73.539047, 40.974422]]);
+        
+    // create the canvas overlay
+    var canvasLayer = L.canvasLayer()
+                        .delegate(this); // -- if we do not inherit from L.CanvasLayer  we can setup a delegate to receive events from L.CanvasLayer
+        
+    // interval to repeatedly call our draw function in a stream
+    var interval;
+    
+    map.on("dragstart", function() {
+        clearInterval(interval);
+    })
+
+    // called wheenver the canvas needs to be drawn
+    function onDrawLayer(info) {
+            clearInterval(interval);
+            var ctx = info.canvas.getContext('2d');
+            ctx.clearRect(0, 0, info.canvas.width, info.canvas.height);
+            ctx.fillStyle = "rgba(0,0,0,1)";
+            mapBounds = map.getBounds();
+            var toRender = search(tree, mapBounds.getWest(), mapBounds.getSouth(), mapBounds.getEast(), mapBounds.getNorth());
+            draw_stream(toRender, info, 10000);
+    };
+        
+    // draws a stream of points, on the ctx supplied by info, batch_size points at a time
+    var draw_stream = function(to_render, info, batch_size){
+        
+        // clear the current intervalu
+        clearInterval(interval);
+        var index = 0;
+        
+        var ctx = info.canvas.getContext('2d');
+        ctx.clearRect(0, 0, info.canvas.width, info.canvas.height);
+        ctx.fillStyle = "rgba(0,0,0,1)";
+        
+        shuffle(to_render);
+
+        var draw_batch = function(){            
+            if (index + batch_size > to_render.length) {
+                clearInterval(interval);
+            }
+            for(var i = index; i <= Math.min(to_render.length - 1, index + batch_size); i++) {
+                draw_point(info.layer._map.latLngToContainerPoint([to_render[i].Lat, to_render[i].Lng]), ctx);
+            }
+            
+            
+            index = index + batch_size;    
+
+        }
+        
+
+        interval = setInterval(function(){
+            draw_batch()
+        }, 10)
+    }
+    
+    // shuffles the array so the points are drawn randomly
+    function shuffle(array) {
+        var m = array.length, t, i;
+
+        // While there remain elements to shuffle…
+        while (m) {
+            // Pick a remaining element…
+            i = Math.floor(Math.random() * m--);
+
+            // And swap it with the current element.
+            t = array[m];
+            array[m] = array[i];
+            array[i] = t;
+        }
+
+        return array;
+    }
+
+
+    
+    function draw_point(point, ctx) {
+                            ctx.beginPath();
+                    ctx.arc(point.x, point.y, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.closePath();
+    }
+    
+    // get the latitude from a data point
+    function getLat(d) {
+        return d.Lat;
+    }
+        
+    // get the longitude from a data point
+    function getLng(d) {
+        return d.Lng;
+    }
+        
+    // Find the nodes within the specified rectangle.
+    function search(quadtree, x0, y0, x3, y3) {
+        points = [] // variable to store the valid points
+        
+        quadtree.visit(
+            // visits each node and calls the callback if the node returns true
+            function(node, x1, y1, x2, y2) {
+            if (!node.length) {
+                do {
+                        var d = node.data;
+                        if ((getLng(d) >= x0) && (getLng(d) < x3) && (getLat(d) >= y0) && (getLat(d) < y3)) {
+                            points.push(d);
+                        }
+                } while (node = node.next);
+            }
+            // return true of the bounds of the node are in the bounds of teh bxo we specified
+            return x1 >= x3 || y1 >= y3 || x2 < x0 || y2 < y0;
+        });
+        return points;
+    }
+        
+    // load the data
+    d3.csv(csvFilePath, function(error, file) {
+        if (error) throw error;
+        
+        tree.addAll(file);
+        
+        canvasLayer.addTo(map);
+        
+    });
+    
+        
+
+        
+
+    </script>
+  </body>
+</html>

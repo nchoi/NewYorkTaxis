@@ -1,0 +1,468 @@
+<html>
+  <head>
+<!--        leaflet stylesheet-->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />      
+<!--        leaflet source-->
+        <script type="text/javascript" src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+<!--        d3 source-->
+        <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+<!--        canvas overlay-->
+        <script type="text/javascript" src="https://rawgit.com/nchoi/NewYorkTaxis/master/L.CanvasLayer.js"></script>
+<!--        synced maps-->
+        <script type="text/javascript" src="https://rawgit.com/nchoi/NewYorkTaxis/master/L.Map.Sync.js"></script>
+
+        <style>
+            body {
+                margin: 0px;
+            }
+            
+            #mapContainer {
+                display: flex;    
+                background-color:Gray;
+            }
+            
+            #mapContainer div {
+                flex-basis: 100%;
+            }
+
+            #mapA {
+                background-color:gainsboro;
+                border-right: 1px solid;
+            }
+            #mapB {
+                background-color:gainsboro;
+                border-left: 1px solid;
+            }
+            
+            /* style the time label */
+            #timeLabel {
+                padding: 10px;
+                border: solid 1px #dcdcdc;
+                transition: box-shadow 0.3s, border 0.3s;
+                display: inline;
+                font-family: sans-serif;
+                font-size: 12px;
+                border-radius: 10px;
+                width: 3em;
+                text-align: center;
+            }
+
+            /* on focus timelabel gets highlight */
+            #timeLabel:focus,
+            #timeLabel.focus {
+                border: solid 1px #707070;
+                box-shadow: 0 0 5px 1px #969696;
+                outline: none;
+            }
+
+            /* time label arrows are hidden */
+            #timeLabel::-webkit-outer-spin-button, 
+            #timeLabel::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            /* time label arrows are hidden */
+            #timeLabel {
+                -moz-appearance: textfield;
+            }
+        </style>
+  </head>
+  <body>
+    <div id="mapContainer">
+    <div id="mapA"></div>
+    <div id="mapB"></div>
+    </div>
+
+
+    <script>
+        
+    (function() {
+        // height and width are the size of the window
+        var width = Math.max(window.innerWidth),
+            height = Math.max(window.innerHeight);
+        
+        // map bounds hand calculated to allow for nyc
+        var mapSouth = 40.474865,
+            mapWest = -74.367142,
+            mapNorth = 40.974422,
+            mapEast = -73.539047;
+        
+        // keep track of the current maps key is mapid
+        var maps = {};
+
+        // set the size of the map container
+        setMapContainerSize();
+
+        // dynamically resize elements when the window size changes
+        window.addEventListener("resize", resizeThrottler, false);
+
+        // hours is array from 0 to 23
+        var hours = [...Array(24).keys()];
+        // the file name for our fileset
+        var fileName = "https://rawgit.com/nchoi/NewYorkTaxis/master/geoData/hour_clusters/cluster{h}.csv" 
+        // create the file set
+        var fileSet = hours.map(function(hour) {return fileName.replace("{h}", hour)});
+
+        // create a quadtree to hold our data
+        var quadTrees = []
+
+        // for each hour append a separate quadtree to our list of quadtrees
+        hours.forEach(function() {
+            quadTrees.push(
+                    d3.quadtree()
+                        .x(getLng)
+                        .y(getLat)
+                        .extent([[mapWest, mapSouth], [mapEast, mapNorth]])
+                );
+            });
+
+        // create a queue to get our files
+        var queue = d3.queue();
+
+        // download each file through d3.csv
+        fileSet.forEach(function(filename) {
+            queue.defer(d3.csv, filename);                
+        });
+
+        // await all the files to load
+        queue.awaitAll(LoadDataSets);
+
+        // loads all the datasets which were appended to the queue into its own quadtree
+        function LoadDataSets(error, csvDataSets) {
+            // if loading the data created an error throw that
+            if (error) throw error;
+
+            // otherwise add each dataset to its own quadtree
+            csvDataSets.forEach(function(dataSet, index){
+               quadTrees[index].addAll(dataSet); 
+            });
+
+            // create the two maps
+            mapA = new createMap('mapA');
+            maps['mapA'] = mapA;
+            mapB = new createMap('mapB');
+            maps['mapB'] = mapB;
+
+            // sync the two maps
+            mapA._map.sync(mapB._map, 
+                           {noInitialSync: true, // disables initial synchronization of the maps.
+                           });      
+            mapB._map.sync(mapA._map, 
+                           {noInitialSync: true, // disables initial synchronization of the maps.
+                           });
+            
+            mapA._map.setZoom(12);
+
+            
+        }
+        
+        // throttle window resize calls for performance reasons
+        var resizeTimeout;
+        function resizeThrottler() {
+            // ignore resize events as long as an actualResizeHandler execution is in the queue
+            if ( !resizeTimeout ) {
+                resizeTimeout = setTimeout(function() {
+                resizeTimeout = null;
+                onWindowResized();
+
+                // The actualResizeHandler will execute at this rate
+                }, 66);
+            }
+        }
+
+        // called whenever the window is resized
+        function onWindowResized() {
+            // update height and width variables to represent new height and width
+            width = Math.max(window.innerWidth);
+            height = Math.max(window.innerHeight);
+            // update the size of the map container
+            setMapContainerSize();
+            
+            var mapList = Object.keys(maps).map(function(key){
+                    return maps[key];
+            });
+            
+            // update the size of all the maps
+            mapList.forEach(function(map) {
+                map.onWindowResized();
+            });
+        }
+        
+        // resize the map container to fill the window
+        function setMapContainerSize() {
+            d3.select("#mapContainer")
+                .style("width", width)
+                .style("height", height);
+        }
+        
+        // creates a map in the div identified by mapId
+        function createMap(mapId) {
+            
+            // the current time being displayed on the map
+            this._currentTime = 0;
+            
+            // interval to repeatedly call our draw function in a stream
+            this._drawInterval;
+            
+            // possible styles to use with cartodb basemaps
+            //light_all, dark_all, light_nolabels, light_only_labels, dark_nolabels, dark_only_labels
+            this._mapStyle = "light_all";
+            
+
+            
+            // create the bounds in leaflet supported format
+            this._southWest = L.latLng(mapSouth, mapWest)
+            this._northEast = L.latLng(mapNorth, mapEast)
+            this._bounds = L.latLngBounds(this._southWest, this._northEast);
+            
+            // initialize the map on the "map" div with a given center and zoom
+            this._map = L.map(mapId, {
+                center: [40.70, -73.94],
+                zoom: 10,
+                zoomControl: true,
+                zoomAnimation: true      
+            }).setMaxBounds(this._bounds);
+            
+            // get the background of the maps from cartodb, use the style from earlier
+            L.tileLayer(`https://cartodb-basemaps-{s}.global.ssl.fastly.net/${this._mapStyle}/{z}/{x}/{y}.png`, 
+            {
+                // max zoom level
+                maxZoom: 15,
+                minZoom: 10,
+                // attribution in the lower right (necessary for copyright reasons!)
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'
+            }).addTo(this._map);
+            
+            // create the canvas overlay
+            this._canvasOverlay = L.canvasLayer()
+                                .delegate(this)
+                                .addTo(this._map); // -- if we do not inherit from L.CanvasLayer  we can setup a delegate to receive events from L.CanvasLayer
+
+            // stop drawing points when the map is dragged
+            this._map.on("dragstart", function() {
+                clearInterval(this._drawInterval);
+            })
+
+            // called by the canvas layer whenever the canvas overlay needs to be drawn
+            this.onDrawLayer = function(info) {
+                // stop the current stream of points from being drawn
+                clearInterval(this._drawInterval);
+                // get the bounds of the map
+                mapBounds = this._map.getBounds();
+                // find all the points using a quadtree search that we need to draw in the quadtree associated with the current time
+                var toRender = this.search(quadTrees[this._currentTime], mapBounds.getWest(), mapBounds.getSouth(), mapBounds.getEast(), mapBounds.getNorth());
+                // draw the found points in a stream, with the given batch size!
+                this.draw_stream(toRender, info, 10000);
+            };
+            
+            
+            // draws a stream of points, on the ctx supplied by info, batch_size points at a time
+            this.draw_stream = function(to_render, info, batch_size){
+
+                // stop the current points from being draw
+                clearInterval(this._drawInterval);
+
+                // set the index of the point we are drawing
+                var index = 0;
+
+                // get the canvas context
+                var ctx = info.canvas.getContext('2d');
+                // clear the current canvas
+                ctx.clearRect(0, 0, info.canvas.width, info.canvas.height); 
+                // set the fill style for the canvas context (color the points will be drawn in)
+                ctx.fillStyle = "rgba(0,0,0,1)";
+
+                // shuffle the points so they are drawn randomly
+                this.shuffle(to_render);
+
+                // function to draw a batch of points
+                var draw_batch = function(){     
+                    // if the index + the next batch size is larger then the array size, then clear the interval so that this is the last batch drawn
+                    if (index + batch_size > to_render.length) {
+                        clearInterval(this._drawInterval);
+                    }
+
+                    // iterate through the points and draw them all on the ctx, at the point supplied by the maps latlng to container point
+                    for(var i = index; i <= Math.min(to_render.length - 1, index + batch_size); i++) {
+                        draw_point(info.layer._map.latLngToContainerPoint([to_render[i].Lat, to_render[i].Lng]), ctx);
+                    }
+
+                    // increase the index by the batch size
+                    index = index + batch_size;    
+
+                }
+
+                // set an interval to draw a batch of points every 10ms
+                this._drawInterval = setInterval(function(){
+                    draw_batch()
+                }, 10)
+            }
+            
+            // draws an individual point on the canvas
+            function draw_point(point, ctx) {
+                ctx.beginPath();
+                // point centerx, centery, radius, start angle, end angle
+                ctx.arc(point.x, point.y, 1, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.closePath();
+            }
+            
+            // shuffles the array in place so the points are drawn randomly
+            this.shuffle = function(array) {
+                var m = array.length, t, i;
+
+                // While there remain elements to shuffle…
+                while (m) {
+                    // Pick a remaining element…
+                    i = Math.floor(Math.random() * m--);
+
+                    // And swap it with the current element.
+                    t = array[m];
+                    array[m] = array[i];
+                    array[i] = t;
+                }
+
+                return array;
+            }
+            
+            // Find the nodes within the specified rectangle.
+            // x0 < x3, y0 < y3
+            this.search = function(quadtree, x0, y0, x3, y3) {
+                points = [] // variable to store the valid points
+
+                quadtree.visit(
+                    // visits each node and calls the callback if the node returns true
+                    // x1, y1, x2, y2 are bounds of the node such that x1 < x2, y1 < y2
+                    function(node, x1, y1, x2, y2) {
+
+                    // if we are at a leaf node, i.e. node length is undefined
+                    if (!node.length) {
+                        // iterate through all the data in that leaf
+                        do {
+                                var d = node.data;
+                                // if the node falls within the proper bounds
+                                if ((getLng(d) >= x0) && (getLng(d) < x3) && (getLat(d) >= y0) && (getLat(d) < y3)) {
+                                    points.push(d); // add it to the list of valid points
+                                }
+                        } while (node = node.next);
+                    }
+                    // return true of the bounds of the node are in the bounds of the box we specified
+                    return x1 >= x3 || y1 >= y3 || x2 < x0 || y2 < y0;
+                });
+                return points;
+            }
+            
+            
+            // add our custom slider
+            L.Control.HourSlider = L.Control.extend({
+                onAdd: function(map) {                    
+                    // create a container div to hold the control
+                    this.container = L.DomUtil.create('div', 'sliderContainer');
+
+                    // add our custom control to the div
+                    this.container.innerHTML = '\
+        <!-- text input which when changed updates the slider -->\
+        <input type="number" id="timeLabel" value="0" min="0" max="23" required="true">\
+        <!-- slider range which when changed updates the text -->\
+        <input type="range" value="0" min="0" max="23" id="timeSlider" step="1">\
+                    ';
+
+                    this.container.onmouseover = function(){
+                        map.dragging.disable();   
+                        map.touchZoom.disable();
+                        map.doubleClickZoom.disable();
+                        map.scrollWheelZoom.disable();
+                        map.boxZoom.disable();
+                    }
+                    this.container.onmouseout = function(){
+                        map.dragging.enable();
+                        map.touchZoom.enable();
+                        map.doubleClickZoom.enable();
+                        map.scrollWheelZoom.enable();
+                        map.boxZoom.enable();
+                    }
+
+                    return this.container;
+                },
+
+                onRemove: function(map) {
+                // Nothing to do here
+                }
+            });
+
+            L.control.HourSlider = function(opts) {
+                return new L.Control.HourSlider(opts);
+            }
+
+            L.control.HourSlider({ position: 'bottomleft' }).addTo(this._map);
+            
+            this._timeLabel = d3.select(`#${mapId}`).select("#timeLabel");
+            this._slider = d3.select(`#${mapId}`).select("#timeSlider");
+            
+            // control what happens when the time label is changed
+            this._timeLabel.on("change", function(event) {
+                
+                // get the time displayed on the timeLabel
+                var time = this.value;
+                
+                // validate the input
+                time = Math.min(Math.max(time, 0), 23); 
+                
+                // update slider value
+                d3.select(`#${mapId}`).select("#timeSlider").property("value", time);
+                
+                // update map hour
+                maps[mapId].updateMapHour(time);
+            });
+            
+            // control what happens when the time slider is changed
+            this._slider.on("change", function(event) {
+                // update map hour
+                var time = this.value;
+                      
+                maps[mapId].updateMapHour(time);
+
+            });
+            
+            // control what happens when the time slider gets input
+            this._slider.on("input", function(event) {
+                
+                // get the time displayed on the slider
+                var time = this.value;
+                
+                // update time label value
+                d3.select(`#${mapId}`).select("#timeLabel").property("value", time);
+            });
+
+
+            // updates the map to display the current time
+            this.updateMapHour = function (time) {
+                // validate the input
+                time = Math.min(Math.max(time, 0), 23); 
+                this._currentTime = time;
+                this._canvasOverlay.needRedraw();
+
+            }
+            
+            
+            // function called whenever the window is resized
+            this.onWindowResized = function () {
+                this._map.invalidateSize();
+            }
+        }
+        
+        // get the latitude from a data point
+        function getLat(d) {
+            return d.Lat;
+        }
+
+        // get the longitude from a data point
+        function getLng(d) {
+            return d.Lng;
+        }        
+    }());
+
+    </script>
+  </body>
+</html>

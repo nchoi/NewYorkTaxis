@@ -38,26 +38,26 @@ Using these predictions, we calculated the errors and visualized them. Below is 
 
 Using scipy, we were then able to get these interesting values **for the errors**.
 
-Num Training Examples: 5000
-Num Testings Examples: 5000
-max: 46.949999999999996
-min: -71.3125
-std: 7.901616565823934
-var: 62.43554435330322
-mean: -0.35887041220446225
-median: -0.04000000000000048
+- Num Training Examples: 5000
+- Num Testings Examples: 5000
+- max: 46.949999999999996
+- min: -71.3125
+- std: 7.901616565823934
+- var: 62.43554435330322
+- mean: -0.35887041220446225
+- median: -0.04000000000000048
 
 A standard deviation of close to 8 seemed very warning. For this reason, we tried our query and python script on 100,000 entries rather than 5,000. Below is a visualization of the errors.
 
 ![Image of 100k training](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/100k_training_same_5000_test.png?raw=true)
-Num Training Examples: 100000
-Num Testings Examples: 5000
-max: 49.09
-min: -69.991959798995
-std: 6.165166883113016
-var: 38.00928269663346
-mean: -0.18568083695739432
-median: 0.24593481989708366
+- Num Training Examples: 100000
+- Num Testings Examples: 5000
+- max: 49.09
+- min: -69.991959798995
+- std: 6.165166883113016
+- var: 38.00928269663346
+- mean: -0.18568083695739432
+- median: 0.24593481989708366
 
 When we increased the training set by a factor of 20, the standard deviation decreased to about 6. That's better, but still seems like our predictive model is not very informative. At least the normal distribution is centered around a mean of about 0! 
 

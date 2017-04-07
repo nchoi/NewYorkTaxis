@@ -64,7 +64,9 @@ When we increased the training set by a factor of 20, the standard deviation dec
 Source code with comments will soon be available.
 
 ### Reflections
-Test
+Although our predictive model wasn't very accurate, we still view this early pass at Machine Learning as a success. Perhaps a better approach would be to predict tip vs total revenue. We believe this would not only be less trivial (most of the revenue is fare, which is probably a linear function of distance between pickup neighborhood and dropoff neighborhood) but perhaps would lead to a more accurate model.
+
+Also, another to consider if Decision Tree Regression is the best option for machine learning algorithms for this problem. We will have to experiment with other algorithms!
 
 ### Visualizations
 Since our previous post, we have made big strides on data visualization! 
@@ -83,10 +85,10 @@ Here is the same visualization, but with the ability to render by a given hour. 
 
 [Points with ability to render by hour](https://nchoi.github.io/NewYorkTaxis/maps/hourlyPoints.html)  
 
+More visualizations are available on the homepage of our blog.
 
 ### The Future
-Labeled data - have to deal with our own labels, track taxis over time
-Categorical
+
 
 
 

@@ -18,8 +18,6 @@ The first three features would be the features of our X feature vector. The y fe
 
 After running this SQL query (once for the training set and once for the test set) for 5000 entries, we ran into a predicament! We wanted to use a regression algorithm to predict the total, but two out of three of our features (pickup_id and dropoff_id) were categorical features rather than continuous values. Luckily, [scikit-learn had a useful way to do some preprocessing](http://scikit-learn.org/stable/modules/preprocessing.html#encoding-categorical-features) each feature into a continuous variable.
 
-
-
 ```
 def do_encoding(feature_vectors):
     enc = preprocessing.OneHotEncoder()
@@ -27,7 +25,23 @@ def do_encoding(feature_vectors):
     return feature_vectors
 ```
 
+After preprocessing our feature vectors, we were ready to apply [Decision Tree Regression](http://scikit-learn.org/stable/auto_examples/tree/plot_tree_regression.html#sphx-glr-auto-examples-tree-plot-tree-regression-py). Using the sci-kit code below, we were able to predict the revenue of each ride in the test feature vectors. 
+```
+    clf = tree.DecisionTreeRegressor()
+    clf = clf.fit(list_of_train_feature_vectors, train_y)
+    clf.predict(list_of_test_feature_vectors)
+```
+Using these predictions, we calculated the errors and visualized them. Below is the error for 5000 entries.
 ![Image of 5k training](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/5000_training_5000_test.png?raw=true)
+
+*Wow, a normal distribution!*
+
+Using scipy, we were then able to get these interesting values **for the errors**.
+| Property      | Value         |
+| ------------- |:-------------:|
+| # of training | 5000          |
+| # of test     | 5000          |
+| max           | 46.95         |
 
 ![Image of 100k training](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/100k_training_same_5000_test.png?raw=true)
 

@@ -21,5 +21,7 @@ We aim to use transportation and weather data sets to optimize the routes that t
 
 ### Blog 1
 [Blog Post 1](https://nchoi.github.io/NewYorkTaxis/blogpost1.html)
+[Blog Post 2](https://nchoi.github.io/NewYorkTaxis/blogpost2.html)
+
 
 

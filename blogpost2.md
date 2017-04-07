@@ -90,6 +90,5 @@ More visualizations are available on the homepage of our blog.
 ### The Future
 After experimenting with Machine Learning, we are more confident in our ability to integrate it into our project. We believe that the real challenge is finding interesting Machine Learning that not only we can implement, but will give nontrivial results. One thought we had was using machine learning to address one of our early goals to (given conditions like time, weather, etc) return a geographic location most likely to lead to well tipping customers.
 
-
-
+We look forward to speaking to our TA about these ideas!
 

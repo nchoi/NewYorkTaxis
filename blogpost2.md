@@ -63,7 +63,20 @@ When we increased the training set by a factor of 20, the standard deviation dec
 
 Source code with comments will soon be available.
 
+### Reflections
+Test
+
 ### Visualizations
+Since our previous post, we have made big strides on data visualization! 
+
+Here is a heat map of 200,000 points from the month of January. Unfortunately, it is not very informative in and of itself. All we can glean from here is obvious: Manhattan is the most common area for taxi pickups, with a few exceptions in the two major airports in NYC. For this reason, we prefer the visualizations below.
+[Heat map](https://nchoi.github.io/NewYorkTaxis/maps/heatmap.html)  
+
+Here is a quadtree based stream rendering of 200k points from the month of January. It is interesting to see 
+[Quadtree based stream rendering of 200k points](https://nchoi.github.io/NewYorkTaxis/maps/canvasQuadtreeStreamRender.html)  
+Here is the same visualization, but with the ability to render by a given hour
+[Points with ability to render by hour](https://nchoi.github.io/NewYorkTaxis/maps/hourlyPoints.html)  
+
 
 ### The Future
 Labeled data - have to deal with our own labels, track taxis over time

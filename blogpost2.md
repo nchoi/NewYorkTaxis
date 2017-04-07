@@ -70,12 +70,18 @@ Test
 Since our previous post, we have made big strides on data visualization! 
 
 Here is a heat map of 200,000 points from the month of January. Unfortunately, it is not very informative in and of itself. All we can glean from here is obvious: Manhattan is the most common area for taxi pickups, with a few exceptions in the two major airports in NYC. For this reason, we prefer the visualizations below.
+
 [Heat map](https://nchoi.github.io/NewYorkTaxis/maps/heatmap.html)  
 
-Here is a quadtree based stream rendering of 200k points from the month of January. It is interesting to see 
+Here is a rendering of 200k points from the month of January. It takes a surprisingly short amount of time to load these points due to several optimizations (e.g., using quadtree as underlying data structure and loading in chunks)! Here, we see more clearly the nuances of taxi pickups. 
+
 [Quadtree based stream rendering of 200k points](https://nchoi.github.io/NewYorkTaxis/maps/canvasQuadtreeStreamRender.html)  
-Here is the same visualization, but with the ability to render by a given hour
-[Points with ability to render by hour](https://nchoi.github.io/NewYorkTaxis/maps/hourlyPoints.html)  
+
+Here is the same visualization, but with the ability to render by a given hour. This is our favorite visualization because it tells many stories! Consider for exmaple the image below. The left plot is from 4am and the right plot is from 4pm. We hypothesize that the huge discrepancy in these two renderings can be explained by the fact that people will be commuting to Manhattan from neighboring boroughs, whereas most people will be in Manhattan at 4pm.
+
+![Image of comparison](https://github.com/nchoi/NewYorkTaxis/blob/master/imgs/comparison.png?raw=true)
+
+[Points with ability to render by hour](https://nchoi.github.io/NewYorkTaxis/maps/hourlyPoints.html)  
 
 
 ### The Future

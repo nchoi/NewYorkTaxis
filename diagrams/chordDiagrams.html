@@ -1,0 +1,109 @@
+<html>
+  <head>
+<!--        d3 source-->
+        <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+<!--      migrations which is a list of lists [pickup borough id, dropoff borough id, number of cabs]-->
+        <script type="text/javascript" src="../geoData/migrations.js"></script>
+  </head>
+  <body>
+
+    <script>
+        
+        // dimension attributes
+        var width = 500,
+            height = 500,
+            outerRadius = Math.min(width, height) * 0.5 - 40,
+            innerRadius = outerRadius - 30;
+        
+        // download the boroughs file
+        var boroughGeoJsonFile = "https://rawgit.com/nchoi/NewYorkTaxis/master/geoData/boroughs.json";
+        d3.json(boroughGeoJsonFile, createChord);
+        
+        var formatValue = d3.formatPrefix(",.0", 1e3);
+
+        
+        // creawte the chord diagram
+        function createChord(error, boroughFile) {
+            if (error) throw error;
+            
+            var chord = d3.chord().padAngle(0.05)
+                                    .sortSubgroups(d3.descending);
+            
+            // matrix for the chord diagram where element [i][j] is the flow from the ith node to the jth node
+            // here the matrix is 5 x 5 cause five boroughs
+            var matrix = migrations;
+                        
+            
+            // d3 ribbon used to display the chord
+            var arc = d3.arc()
+                .innerRadius(innerRadius)
+                .outerRadius(outerRadius);
+
+            var ribbon = d3.ribbon()
+                .radius(innerRadius);
+
+            var color = d3.scaleOrdinal()
+                .domain(d3.range(4))
+                .range(["#000000", "#FFDD89", "#957244", "#F26223"]);
+            
+            var svg = d3.select("body").append("svg")
+                        .attr("width", width)
+                        .attr("height", height);
+            
+            var g = svg.append("g")
+                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+                .datum(chord(matrix));
+            
+            var group = g.append("g")
+                            .attr("class", "groups")
+                              .selectAll("g")
+                              .data(function(chords) { return chords.groups; })
+                              .enter().append("g");
+
+            group.append("path")
+                .style("fill", function(d) { return color(d.index); })
+                .style("stroke", function(d) { return d3.rgb(color(d.index)).darker(); })
+                .attr("d", arc);
+
+//            var groupTick = group.selectAll(".group-tick")
+//              .data(function(d) { return groupTicks(d, 1e3); })
+//              .enter().append("g")
+//                .attr("class", "group-tick")
+//                .attr("transform", function(d) { return "rotate(" + (d.angle * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)"; });
+//
+//            groupTick.append("line")
+//                .attr("x2", 6);
+//
+//            groupTick
+//              .filter(function(d) { return d.value % 5e3 === 0; })
+//              .append("text")
+//                .attr("x", 8)
+//                .attr("dy", ".35em")
+//                .attr("transform", function(d) { return d.angle > Math.PI ? "rotate(180) translate(-16)" : null; })
+//                .style("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
+//                .text(function(d) { return formatValue(d.value); });
+
+            g.append("g")
+                .attr("class", "ribbons")
+              .selectAll("path")
+              .data(function(chords) { return chords; })
+              .enter().append("path")
+                .attr("d", ribbon)
+                .style("fill", function(d) { return color(d.target.index); })
+                .style("stroke", function(d) { return d3.rgb(color(d.target.index)).darker(); });
+
+//            // Returns an array of tick angles and values for a given group and step.
+//            function groupTicks(d, step) {
+//              var k = (d.endAngle - d.startAngle) / d.value;
+//              return d3.range(0, d.value, step).map(function(value) {
+//                return {value: value, angle: value * k + d.startAngle};
+//  });
+//}
+            
+
+            
+        }
+
+    </script>
+  </body>
+</html>

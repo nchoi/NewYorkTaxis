@@ -1,3 +1,4 @@
+# Blog Post #3
 # Predicting Tip Percentages Using Random Forests
 
 We tried to predict the percent tip that customers will give their driver using random forest regression. Our input variables were 

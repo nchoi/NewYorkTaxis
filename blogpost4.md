@@ -3,11 +3,11 @@
 # Predicting Tip Percentages Using Random Forest after Integrating Weather
 
 For our fourth blog post, we decided to investigate tip percentages, finally taking into account weather from Wunderground. Again, we did this using random forest regression. Our input variables were 
-
-- Temperature
-- Weather Conditions
-- Time of Day
+- Pickup neighborhood
 - Month
+- Hour
+- Temperature
+- Condition
 
 While the target variable was percentage tip, calculated in the SQL query below.
 
@@ -30,11 +30,35 @@ SELECT * FROM taxiweather
 WHERE tip_pct != 0 AND temperature != -9999 AND pickup_neighborhood IS NOT NULL LIMIT 10000;
 ```
 
-To set up our testing and training X vectors, we ran the above SQL query and saved the output to a csv. 
+To set up our testing and training X vectors, we ran the above SQL query and saved the output to a csv. Notice that our query involved a merging between yellow_tripdata (the table of rides) and hourly_weather (the table we created from Wunderground data). For each ride, we now have the corresponding weather.
 
-We cleaned our data set by ignoring zero dollar tips and fares. Although we recognize that customers may tip zero dollars, a large percentage of tips in the dataset are recorded as zero dollars leading us to believe that there was a discrepancy. Most of these tips were associated with cash payments so we also ignored all rides paid for with cash. Finally we ignored rides with latitude and longitude values of 0 since these are physically impossible, and rides which could not be mapped to a neighborhood or borough since null values would be hard to perform regression on.
+Just as we did last week, we cleaned our data set by ignoring zero dollar tips and fares for the same reason. (A large percentage of tips in the dataset are recorded as zero dollars leading us to believe that there was a discrepancy. Most of these tips were associated with cash payments so we also ignored all rides paid for with cash.) Furthermore, we ignored rides with a recorded temperature of -9999 for obvious reasons and pickup neighborhood IDs recorded as NULL.
 
-## Using Flask
+
+Below is an image of the results from our query.
+
+TODO: Include Image
+
+## Performing Machine Learning
+
+Now that we had a CSV file of 10,000 entries, we set up our trainX, trainY, testX, and testY vectors by splitting the data into a training set and a test set. 
+
+Before we trained our model, we first had to encode our training categorical variables, specifically pickupneighborhood, month, and condition. Luckily scikit's OneHotEncoder initializer takes in an optional paramter called categorical_values, a list of indices that represent our categorical values!
+
+We then used DecisionTreeRegression to train a model based on the training X and training Y. We pickled the model we created, as well as the encoder. We will need these two Python objects below!
+
+Our recorded average error in predicting was approximately 3% in tip. 
+
+TODO: Include Image
+
+
+## New website
+In other news, we took our TA's advice and created a new updated website. The major difference is that we now have a bar at the top that lets us switch between different visualizations!
+
+TODO: Include image of new website
+
+## Flask
+Using our new 
 set up website using flask, unpickled encoder and 
 
 

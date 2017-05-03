@@ -56,10 +56,9 @@ In other news, we took our TA's advice and created a new updated website. The ma
 TODO: Include image of new website
 
 ## Flask
-Using our new 
 set up website using flask, unpickled encoder and 
 
 
 ## Visualization
-
+TODO: Show image of the red/pink neighborhoods
 

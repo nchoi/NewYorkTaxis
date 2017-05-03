@@ -1,6 +1,6 @@
 
 # Blog Post #4
-# Predicting Tip Percentages Using Random Forest after Integrating Weather
+# Predicting Tip Percentages Using Decision Tree Regression after Integrating Weather
 
 For our fourth blog post, we decided to investigate tip percentages, finally taking into account weather from Wunderground. Again, we did this using random forest regression. Our input variables were 
 - Pickup neighborhood
@@ -37,7 +37,7 @@ Just as we did last week, we cleaned our data set by ignoring zero dollar tips a
 
 Below is an image of the results from our query.
 
-TODO: Include Image
+![Query results](imgs/queryresults.png)
 
 ## Performing Machine Learning
 
@@ -48,8 +48,6 @@ Before we trained our model, we first had to encode our training categorical var
 We then used DecisionTreeRegression to train a model based on the training X and training Y. We pickled the model we created, as well as the encoder. We will need these two Python objects below!
 
 Our recorded average error in predicting was approximately 3% in tip. 
-
-TODO: Include Image
 
 
 ## New website
@@ -65,4 +63,3 @@ set up website using flask, unpickled encoder and
 ## Visualization
 
 
-# Results

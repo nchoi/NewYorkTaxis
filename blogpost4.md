@@ -56,12 +56,16 @@ In other news, we took our TA's advice and created a new updated website. The ma
 TODO: Include image of new website
 
 ## Flask
+Using our new 
 set up website using flask, unpickled encoder and 
 
 
 ## Visualization
-TODO: Show image of the red/pink neighborhoods
 
-## Moving Forward
-We have few goals we will make sure to accomplish before the final presentation. First, we plan to incorporate an animatated D3 visualization. Second, we plan to keep working toward a machine learning model that is an adequate predictor. This will either involve shifting our focus from tip percentages or incorporating new features to consider.
+The model we trained had a mean error of 0.03215. Although our distribution of predicted values are centered correctly around the mean, it does not account for the outliers. This leads us believe that there are other factors that contribute to tip percentage that we did not take into account. For example, tip percentage could be influenced by the quality of each driver, as well as the riders’ unknown biases (e.g., race, gender, etc).
+
+Using our model, we constructed an interactive visualization that colors neighborhoods based on predicted tip percentages, factoring in user inputted variables: month, hour, and weather conditions. Below is an image of the visualization:
+
+![ML Visualization](imgs/lloydviz.png)
+
 

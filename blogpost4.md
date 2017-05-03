@@ -53,9 +53,8 @@ Our recorded average error in predicting was approximately 3.215% in tip. Althou
 ## New website
 In other news, we took our TA's advice and created a new updated website. The major difference is that we now have a bar at the top that lets us switch between different visualizations!
 
-TODO: Include image of new website
+![Bar](imgs/bar.png)
 
-TODO: Attach a link to the new website.
 
 ## Flask
 For the first time in our project, we wanted to combine data visualization and machine learning. To do so, we used the Flask Python microframework to use our trained Python regression model. 

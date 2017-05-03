@@ -55,11 +55,22 @@ In other news, we took our TA's advice and created a new updated website. The ma
 
 TODO: Include image of new website
 
-## Flask
-set up website using flask, unpickled encoder and 
+TODO: Attach a link to the new website.
 
+## Flask
+For the first time in our project, we wanted to combine data visualization and machine learning. To do so, we used the Flask Python microframework to use our trained Python regression model. 
+
+First, we had to pickle both the trained model and the fitted processor. Then in the visualization we discuss in the next section, we unpickled the aforementioned Python objects when the visualization loads.
 
 ## Visualization
+After the visualization loads (at first as a blank map of NYC), we wait for the user to input four out of five of the input variables:
+
+- Month
+- Hour
+- Temperature
+- Condition
+
+
 TODO: Show image of the red/pink neighborhoods
 
 ## Moving Forward

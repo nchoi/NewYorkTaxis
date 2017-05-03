@@ -47,7 +47,7 @@ Before we trained our model, we first had to encode our training categorical var
 
 We then used DecisionTreeRegression to train a model based on the training X and training Y. We pickled the model we created, as well as the encoder. We will need these two Python objects below!
 
-Our recorded average error in predicting was approximately 3% in tip. 
+Our recorded average error in predicting was approximately 3.215% in tip. Although our distribution of predicted values are centered correctly around the mean, it does not account for the outliers. This leads us believe that there are other factors that contribute to tip percentage that we did not take into account. For example, tip percentage could be influenced by the quality of each driver, as well as the riders’ unknown biases (e.g., race, gender, etc).
 
 
 ## New website
@@ -72,8 +72,6 @@ After the visualization loads (at first as a blank map of NYC), we wait for the 
 - Temperature
 - Condition
 
-
-The model we trained had a mean error of 0.03215. Although our distribution of predicted values are centered correctly around the mean, it does not account for the outliers. This leads us believe that there are other factors that contribute to tip percentage that we did not take into account. For example, tip percentage could be influenced by the quality of each driver, as well as the riders’ unknown biases (e.g., race, gender, etc).
 
 Using our model, we constructed an interactive visualization that colors neighborhoods based on predicted tip percentages, factoring in user inputted variables: month, hour, and weather conditions. Below is an image of the visualization:
 

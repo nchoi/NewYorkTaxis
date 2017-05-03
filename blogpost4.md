@@ -58,11 +58,14 @@ TODO: Include image of new website
 TODO: Attach a link to the new website.
 
 ## Flask
+
 For the first time in our project, we wanted to combine data visualization and machine learning. To do so, we used the Flask Python microframework to use our trained Python regression model. 
+
 
 First, we had to pickle both the trained model and the fitted processor. Then in the visualization we discuss in the next section, we unpickled the aforementioned Python objects when the visualization loads.
 
 ## Visualization
+
 After the visualization loads (at first as a blank map of NYC), we wait for the user to input four out of five of the input variables:
 
 - Month
@@ -71,8 +74,10 @@ After the visualization loads (at first as a blank map of NYC), we wait for the 
 - Condition
 
 
-TODO: Show image of the red/pink neighborhoods
+The model we trained had a mean error of 0.03215. Although our distribution of predicted values are centered correctly around the mean, it does not account for the outliers. This leads us believe that there are other factors that contribute to tip percentage that we did not take into account. For example, tip percentage could be influenced by the quality of each driver, as well as the riders’ unknown biases (e.g., race, gender, etc).
 
-## Moving Forward
-We have few goals we will make sure to accomplish before the final presentation. First, we plan to incorporate an animatated D3 visualization. Second, we plan to keep working toward a machine learning model that is an adequate predictor. This will either involve shifting our focus from tip percentages or incorporating new features to consider.
+Using our model, we constructed an interactive visualization that colors neighborhoods based on predicted tip percentages, factoring in user inputted variables: month, hour, and weather conditions. Below is an image of the visualization:
+
+![ML Visualization](imgs/lloydviz.png)
+
 

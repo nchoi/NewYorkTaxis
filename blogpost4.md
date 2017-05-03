@@ -51,7 +51,7 @@ Our recorded average error in predicting was approximately 3.215% in tip. Althou
 
 
 ## New website
-In other news, we took our TA's advice and created a new updated website. The major difference is that we now have a bar at the top that lets us switch between different visualizations!
+In other news, we took our TA's advice and created a new updated website. Unfortunately it's not up yet, but will be by the final project presentation. The major difference is that we now have a bar at the top that lets us switch between different visualizations!
 
 ![Bar](imgs/bar.png)
 

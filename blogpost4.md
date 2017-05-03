@@ -72,8 +72,9 @@ After the visualization loads (at first as a blank map of NYC), we wait for the 
 - Temperature
 - Condition
 
+Then, for each neighborhood, given these parameters, we estimated the tip percentage a driver would expect. These estimates were then visualized as varying shades of red, where darker neighborhoods indicated higher predicted tip percentages.
 
-Using our model, we constructed an interactive visualization that colors neighborhoods based on predicted tip percentages, factoring in user inputted variables: month, hour, and weather conditions. Below is an image of the visualization:
+Below is an image of the visualization:
 
 ![ML Visualization](imgs/lloydviz.png)
 

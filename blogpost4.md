@@ -62,3 +62,6 @@ set up website using flask, unpickled encoder and
 ## Visualization
 TODO: Show image of the red/pink neighborhoods
 
+## Moving Forward
+We have few goals we will make sure to accomplish before the final presentation. First, we plan to incorporate an animatated D3 visualization. Second, we plan to keep working toward a machine learning model that is an adequate predictor. 
+

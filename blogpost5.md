@@ -53,12 +53,6 @@ In other news, we took our TA's advice and created a new updated website. Unfort
 ![Bar](imgs/bar.png)
 
 
-## Flask
-For the first time in our project, we wanted to combine data visualization and machine learning. To do so, we used the Flask Python microframework to use our trained Python regression model. 
-
-First, we had to pickle both the trained model and the fitted processor. Then in the visualization we discuss in the next section, we unpickled the aforementioned Python objects when the visualization loads.
-
-
 ## Visualization
 
 We like how the accompanying visualization for this investigation came out!

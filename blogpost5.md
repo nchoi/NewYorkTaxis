@@ -35,7 +35,7 @@ Below is an image of the results from our query.
 
 Below is an image of the results from our query.
 TODO: INCLUDE IMAGE
-![Query results](imgs/aew.png)
+![Query results](imgs/query.png)
 
 ## Performing Machine Learning
 
@@ -47,10 +47,6 @@ We then used DecisionTreeRegression to train a model based on the training X and
 
 Our recorded average error in predicting was approximately 12 rides/hr.
 
-## New website
-In other news, we took our TA's advice and created a new updated website. Unfortunately it's not up yet, but will be by the final project presentation. The major difference is that we now have a bar at the top that lets us switch between different visualizations!
-
-![Bar](imgs/bar.png)
 
 
 ## Visualization

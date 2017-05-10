@@ -34,7 +34,7 @@ Below is an image of the results from our query.
 
 
 Below is an image of the results from our query.
-TODO: INCLUDE IMAGE
+
 ![Query results](imgs/query.png)
 
 ## Performing Machine Learning
@@ -58,7 +58,13 @@ After the visualization loads (at first as a blank map of NYC), we wait for the 
 Below is an image of the visualization at varying times:
 
 
-![ML Visualization](imgs/lloydviz.png)
+![6am Visualization](imgs/viz_screenshot_6am.png)
+
+![12pm Visualization](imgs/viz_screenshot_12pm.png)
+
+![5pm Visualization](imgs/viz_screenshot_5pm.png)
+
+![2am Visualization](imgs/viz_screenshot_2am.png)
 
 
 ## Closing Thoughts

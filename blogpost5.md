@@ -57,13 +57,15 @@ After the visualization loads (at first as a blank map of NYC), we wait for the 
 
 Below is an image of the visualization at varying times:
 
-
+### 6am : We can see a lot of widespread activity in all of Manhattan, presumably because there are many people on their daily commute.
 ![6am Visualization](imgs/viz_screenshot_6am.png)
+
+
+### 12pm : We see that most of the activity is in the Midtown. This makes sense, because most people taking Taxis at this time are probably tourists (proximity to Times Square) and most locals are working.
 
 ![12pm Visualization](imgs/viz_screenshot_12pm.png)
 
-![5pm Visualization](imgs/viz_screenshot_5pm.png)
-
+### 2am : We see a lot of activity in Lower Manhattan, where there is an active club scene!
 ![2am Visualization](imgs/viz_screenshot_2am.png)
 
 

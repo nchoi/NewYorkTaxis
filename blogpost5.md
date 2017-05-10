@@ -68,4 +68,6 @@ Below is an image of the visualization at varying times:
 
 
 ## Closing Thoughts
-TODO: ADD closing thoughts
+
+We would like to thank Todd Schneider, Tiffany Citra, Rosemary Michelle Simpson, Miranda Chao, Colby Tresness, and Sahil Mishra for their unwavering support.
+
